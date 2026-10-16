@@ -14,4 +14,4 @@
 
 #### Chapitre 5: Comprendre le perceptron multicouche 
 
-#### Chapitre 6: Tester un reseaux de neuronne sur des données manuscrites  du MNINST
+#### Chapitre 6: Tester un reseaux de neuronne sur des données manuscrites  du MNIST
