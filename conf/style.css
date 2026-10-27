@@ -1,0 +1,18 @@
+:root {
+  --paper: #eef1f5;
+  --ink: #1b2430;
+  --muted: #8a94a6;
+  --cobalt: #2f4bff;
+  --tint: #dce3ff;
+}
+
+.slidev-layout,
+.slidev-page {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.left-side, .right-side{
+  width: 50%;
+  height: 100%;
+}
