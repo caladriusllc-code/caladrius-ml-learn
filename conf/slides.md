@@ -6,6 +6,7 @@ transition: fade
 fonts:
   sans: Bricolage Grotesque
   provider: google
+  weight: '400,600,700'
 layout: none
 class: px-24 py-20
 ---
@@ -88,10 +89,21 @@ import iadefinition from './components/slides/iadefinition.vue'
 ---
 layout: none
 class: px-24 py-16
+clicks: 3
 ---
 
 <script setup>
-import iadefinition_two from './components/slides/iadefinition_two.vue'
+import IADefinitionTwo from './components/slides/iadefinition_two.vue'
 </script>
 
-<iadefinition_two/>
+<IADefinitionTwo />
+
+---
+layout: none
+class: px-24 py-16
+---
+<script setup>
+import Mecanisme from './components/slides/Mecanisme.vue'
+</script>
+
+<Mecanisme />

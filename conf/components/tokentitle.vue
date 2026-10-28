@@ -176,7 +176,7 @@ onBeforeUnmount(() => { runId++ })
 <template>
   <div class="wrap">
     <div class="left">
-      <h1 class="title">Comment une machine apprend à voir.</h1>
+      <h1 class="title">Comment une machine apprend t-elle à voir ?</h1>
       <div class="sub"><slot /></div>
     </div>
 
