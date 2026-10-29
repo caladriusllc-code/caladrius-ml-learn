@@ -26,7 +26,7 @@ import Vintageslides from './components/Vintageslides.vue'
 
 ---
 layout: none
-class: px-24 py-16
+class: px-12 py-8
 ---
 
 <Vintageslides> 
@@ -62,7 +62,7 @@ class: px-24 py-16
 
 ---
 layout: none
-class: px-24 py-16
+class: px-12 py-8
 ---
 
 <script setup>
@@ -75,7 +75,7 @@ import manuscrits from './components/slides/manuscrits.vue'
 
 ---
 layout: none
-class: px-24 py-16
+class: px-12 py-8
 ---
 
 <script setup>
@@ -88,7 +88,7 @@ import iadefinition from './components/slides/iadefinition.vue'
 
 ---
 layout: none
-class: px-24 py-16
+class: px-12 py-8
 clicks: 3
 ---
 
@@ -100,10 +100,22 @@ import IADefinitionTwo from './components/slides/iadefinition_two.vue'
 
 ---
 layout: none
-class: px-24 py-16
+class: px-12 py-8
 ---
 <script setup>
 import Mecanisme from './components/slides/Mecanisme.vue'
 </script>
 
 <Mecanisme />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import MachineLearning from './components/slides/MachineLearning.vue'
+</script>
+
+<MachineLearning />
+
+
