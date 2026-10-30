@@ -118,4 +118,15 @@ import MachineLearning from './components/slides/MachineLearning.vue'
 
 <MachineLearning />
 
+---
+layout: none
+class: px-12 py-8
+clicks: 2
+---
+<script setup>
+import learningcomponent from './components/slides/learningcomponent.vue'
+</script>
+
+<learningcomponent />
+
 
