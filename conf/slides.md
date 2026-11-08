@@ -21,7 +21,7 @@ import Vintageslides from './components/Vintageslides.vue'
     Reconnaissance d’image et réseaux de neurones artificiels : le b.a.-ba du deep learning
   </div>
   <strong>MIAKO Jean Yves Arnold</strong><br />
-  UCAO-UUA, 04/10/2026
+  UCAO-UUA, 28/11/2026
 </TokenTitle>
 
 ---
