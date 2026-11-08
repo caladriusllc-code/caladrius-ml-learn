@@ -3,7 +3,8 @@
     - En haut : le nuage de points et la droite y = θ₁·(x − x̄) + ȳ, avec les écarts
       (traits verticaux) entre chaque point et la droite.
     - En bas : la fonction de coût J(θ₁), une parabole, et une bille qui descend
-      dedans. Le score J est affiché et baisse quand la droite s'ajuste.
+      dedans. Le score J est affiché et baisse quand la droite s'ajuste, avec les
+      deux paramètres de la droite : θ₁ (pente) et θ₀ = ȳ − θ₁·x̄ (ordonnée à l'origine).
 
   Pourquoi une parabole ?
     La droite passe toujours par le centre du nuage (x̄, ȳ), ce qui revient à garder
@@ -104,7 +105,7 @@
       <line :x1="C.ox" :y1="C.oy" :x2="C.ox" :y2="C.top - 14" marker-end="url(#gd-arrow)" />
     </g>
     <text class="label" :x="C.right + 8" :y="C.oy + 28">
-      θ<tspan class="sub" dy="5">1</tspan>
+      θ
     </text>
     <text class="label" :x="C.ox - 26" :y="C.top - 8">J</text>
 
@@ -141,6 +142,7 @@
     </text>
     <text class="param" :x="xc(stats.wStar)" :y="C.top + 62" text-anchor="middle">
       <tspan class="sym">θ</tspan><tspan class="sub" dy="5">1</tspan><tspan dy="-5"> = {{ fmt(w) }}</tspan>
+      <tspan class="sym" dx="22">θ</tspan><tspan class="sub" dy="5">0</tspan><tspan dy="-5"> = {{ fmt(theta0) }}</tspan>
     </text>
   </svg>
 </template>
@@ -235,6 +237,9 @@ const stats = computed(() => {
 })
 
 const yhat = (x) => stats.value.yb + w.value * (x - stats.value.xb)
+
+// θ₀ = ȳ − θ₁·x̄ : l'ordonnée à l'origine suit θ₁ pour que la droite reste centrée
+const theta0 = computed(() => stats.value.yb - w.value * stats.value.xb)
 
 // J(θ₁) = 1/(2n) Σ (y_t − ŷ_t)²
 const cost = (theta) => {

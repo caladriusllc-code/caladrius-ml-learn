@@ -39,7 +39,7 @@
         <slot name="media">
           <img
             v-if="image"
-            :src="image"
+            :src="image" 
             :alt="alt"
             :style="fit === 'cover'
               ? { objectFit: 'cover', width: '100%', height: '100%' }

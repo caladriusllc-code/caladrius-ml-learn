@@ -132,7 +132,6 @@ import learningcomponent from './components/slides/learningcomponent.vue'
 ---
 layout: none
 class: px-12 py-8
-clicks: 2
 ---
 <script setup>
 import learnalgorithm from './components/slides/learnalgorithm.vue'
@@ -143,10 +142,19 @@ import learnalgorithm from './components/slides/learnalgorithm.vue'
 ---
 layout: none
 class: px-12 py-8
-clicks: 2
 ---
 <script setup>
-import regressionComponent from './components/slides/regressionComponent.vue'
+import DeepLearningTransition from './components/slides/deeplearning/transition.vue'
 </script>
 
-<regressionComponent />
+<DeepLearningTransition />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import chpperceptron from './components/slides/deeplearning/chpperceptron.vue'
+</script>
+
+<chpperceptron />

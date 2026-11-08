@@ -3,7 +3,6 @@
     title="Algorithme d'apprentissage"
     ratio="50/50"
     frame="none"
-    takeaway="Composant du machine learning"
   >
 
     <p>
