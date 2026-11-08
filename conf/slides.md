@@ -129,4 +129,24 @@ import learningcomponent from './components/slides/learningcomponent.vue'
 
 <learningcomponent />
 
+---
+layout: none
+class: px-12 py-8
+clicks: 2
+---
+<script setup>
+import learnalgorithm from './components/slides/learnalgorithm.vue'
+</script>
 
+<learnalgorithm />
+
+---
+layout: none
+class: px-12 py-8
+clicks: 2
+---
+<script setup>
+import regressionComponent from './components/slides/regressionComponent.vue'
+</script>
+
+<regressionComponent />
