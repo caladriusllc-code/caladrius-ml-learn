@@ -158,3 +158,23 @@ import chpperceptron from './components/slides/deeplearning/chpperceptron.vue'
 </script>
 
 <chpperceptron />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import chpperceptrontwo from './components/slides/deeplearning/chpperceptrontwo.vue'
+</script>
+
+<chpperceptrontwo />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import chpperceptrontwotwo from './components/slides/deeplearning/chpperceptrontwotwo.vue'
+</script>
+
+<chpperceptrontwotwo />
