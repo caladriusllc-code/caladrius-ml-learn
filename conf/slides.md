@@ -174,6 +174,26 @@ layout: none
 class: px-12 py-8
 ---
 <script setup>
+import perceptronLearning from './components/slides/deeplearning/perceptronLearning.vue'
+</script>
+
+<perceptronLearning />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import perceptronLearningRule from './components/slides/deeplearning/perceptronLearningRule.vue'
+</script>
+
+<perceptronLearningRule />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
 import chpperceptrontwotwo from './components/slides/deeplearning/chpperceptrontwotwo.vue'
 </script>
 

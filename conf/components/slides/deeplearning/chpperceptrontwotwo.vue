@@ -24,7 +24,7 @@
     
 
         <template #media>
-            <perceptron_2_3_3_noir_blanc />
+            <tlu_minimaliste_noir_blanc />
         </template>
     </splitSide>
 </template>
@@ -33,7 +33,7 @@
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import splitSide from '../../splitSide.vue';
-import perceptron_2_3_3_noir_blanc from '../../perceptron_2_3_3_noir_blanc.vue'
+import tlu_minimaliste_noir_blanc from '../../tlu_minimaliste_noir_blanc.vue'
 
 const model = String.raw`z = w_1x_1 + w_2x_2 + \dots + w_nx_n + b = x^{T}w + b`
 const f = String.raw`f`
