@@ -21,6 +21,8 @@
             linéaires, par exemple les images. Comment procède-t-on pour 
             faire une classification d'images ?
         </p>
+
+        <h3>Passage à un réseau de neurones</h3>
     
 
         <template #media>
@@ -49,5 +51,8 @@ const tex = (src, display = false) =>
 </script>
 
 <style scoped>
-
+h3{
+    font-size: 1.5rem;
+    font-weight: 600;
+}
 </style>

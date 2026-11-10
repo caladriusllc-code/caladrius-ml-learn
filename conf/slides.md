@@ -198,3 +198,23 @@ import chpperceptrontwotwo from './components/slides/deeplearning/chpperceptront
 </script>
 
 <chpperceptrontwotwo />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import perceptronMulti from './components/illustration/multiperceptrondemo.vue'
+</script>
+
+<multiperceptrondemo />
+
+---
+layout: none
+class: px-12 py-8
+---
+<script setup>
+import perceptronMulti from './components/slides/deeplearning/perceptronMulti.vue'
+</script>
+
+<perceptronMulti />

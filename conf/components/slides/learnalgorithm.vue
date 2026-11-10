@@ -29,8 +29,6 @@ import katex from 'katex'
 import 'katex/dist/katex.min.css' // au cas où le CSS n'est pas chargé
 
 import splitSide from '../splitSide.vue'
-import gearmecanism from '../gearmecanism.vue'
-import regressionplot from '../regressionPlot.vue'
 import gradientDescent from '../gradientDescent.vue'
 
 const { clicks } = useNav()
