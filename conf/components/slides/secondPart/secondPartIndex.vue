@@ -15,7 +15,7 @@
 <script>
 import { useIsSlideActive } from '@slidev/client'
 
-const TITLE = "Deuxième partie : Comment fonctionne la reconnaissance ?"
+const TITLE = "Deuxième partie : Comment fonctionne la reconnaissance d'image?"
 const BODY =
   "Voyons ensemble comment est-ce que les ordinateurs analysent " +
   "et reconnaissent-ils les images manuscrites " +

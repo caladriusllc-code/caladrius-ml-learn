@@ -74,7 +74,7 @@ import manuscrits from './components/slides/manuscrits.vue'
 </manuscrits>
 
 ---
-layout: none
+layout: center
 class: px-12 py-8
 ---
 
@@ -87,7 +87,7 @@ import iadefinition from './components/slides/iadefinition.vue'
 </iadefinition>
 
 ---
-layout: none
+layout: center
 class: px-12 py-8
 clicks: 3
 ---
@@ -153,11 +153,23 @@ import DeepLearningTransition from './components/slides/deeplearning/transition.
 layout: none
 class: px-12 py-8
 ---
+
 <script setup>
 import chpperceptron from './components/slides/deeplearning/chpperceptron.vue'
 </script>
 
 <chpperceptron />
+
+---
+layout: none
+class: px-12 py-8
+---
+
+<script setup>
+import TluMinimalisteNoirBlanc from './components/tlu_minimaliste_noir_blanc.vue'
+</script>
+
+<TluMinimalisteNoirBlanc />
 
 ---
 layout: none
@@ -178,6 +190,16 @@ import perceptronLearning from './components/slides/deeplearning/perceptronLearn
 </script>
 
 <perceptronLearning />
+
+---
+layout: center
+class: px-12 py-8
+---
+<script setup>
+import learninganimation from './components/regle_apprentissage_perceptron_anime.vue'
+</script>
+
+<learninganimation />
 
 ---
 layout: none
@@ -228,3 +250,33 @@ import secondPartIndex from './components/slides/secondPart/secondPartIndex.vue'
 </script>
 
 <secondPartIndex />
+
+---
+layout: none
+class: p-4
+---
+<script setup>
+import numberPic from './components/slides/secondPart/numberPic.vue'
+</script>
+
+<numberPic />
+
+---
+layout: center
+class: p-4
+---
+<script setup>
+import MnistNormalization from './components/slides/secondPart/MnistNormalization.vue'
+</script>
+
+<MnistNormalization />
+
+---
+layout: center
+class: p-4
+---
+<script setup>
+import MnistVectorization from './components/slides/secondPart/MnistVectorization.vue'
+</script>
+
+<MnistVectorization />
