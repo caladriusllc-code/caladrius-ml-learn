@@ -109,7 +109,7 @@ import Mecanisme from './components/slides/Mecanisme.vue'
 <Mecanisme />
 
 ---
-layout: none
+layout: center
 class: px-12 py-8
 ---
 <script setup>
@@ -204,7 +204,7 @@ layout: none
 class: px-12 py-8
 ---
 <script setup>
-import perceptronMulti from './components/illustration/multiperceptrondemo.vue'
+import multiperceptrondemo from './components/illustration/multiperceptrondemo.vue'
 </script>
 
 <multiperceptrondemo />
@@ -218,3 +218,13 @@ import perceptronMulti from './components/slides/deeplearning/perceptronMulti.vu
 </script>
 
 <perceptronMulti />
+
+---
+layout: none
+class: p-0
+---
+<script setup>
+import secondPartIndex from './components/slides/secondPart/secondPartIndex.vue'
+</script>
+
+<secondPartIndex />

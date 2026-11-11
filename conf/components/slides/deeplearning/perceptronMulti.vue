@@ -9,7 +9,22 @@
             Un perceptron multicouche est constituée d'une couche d'entrée, 
             d'une ou plusieurs couche TLU appelées couches cachées.
         </p>
+
+        <p>
+            Comment entraine-t-on un tel système de neurone artificiel ? 
+            La solution est venue pour la première fois d'un chercheur 
+            nommé Seppo Linnainmaa dans son mémoire de thèse présente 
+            une technique permettant de calculer automatiquement et 
+            efficacement tous les gradients.
+        </p>
         
+        <p>
+            En seulement deux passes sur le réseau (un avant, une arrière), 
+            l'algorithme est capable de calculer les gradients de l'erreur 
+            du réseau par rapport à chacun des paramètres du modèle. 
+            C'est ce qu'on appelle l'algorithme de rétropropagation.
+        </p>
+
         <template #media>
             <multiperceptrondemo />
         </template>
