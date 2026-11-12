@@ -504,13 +504,16 @@ const gradLabel = computed(() => {
   --muted: rgba(255, 255, 255, 0.58);
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
   padding: clamp(16px, 3vw, 30px);
   overflow: hidden;
   color: #fff;
   background: #050505;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 18px;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .diagram {
