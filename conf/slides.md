@@ -280,3 +280,21 @@ import MnistVectorization from './components/slides/secondPart/MnistVectorizatio
 </script>
 
 <MnistVectorization />
+
+---
+class: p-4
+---
+<script setup>
+import neuralNetworkMnist from './components/slides/secondPart/neuralNetworkMnist.vue'
+</script>
+
+<neuralNetworkMnist />
+
+---
+class: p-4
+---
+<script setup>
+import forwardPropagation from './components/slides/secondPart/forwardPropagation.vue'
+</script>
+
+<forwardPropagation />

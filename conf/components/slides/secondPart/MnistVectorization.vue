@@ -8,7 +8,7 @@
       class="panel matrix-panel"
       :style="{
         width: `calc(var(--W) * ${1 - c})`,
-        marginRight: `calc(56px * ${p * (1 - c)})`,
+        marginRight: `calc(48px * ${p * (1 - c)})`,
         opacity: 1 - c * 0.6
       }"
     >
@@ -28,16 +28,26 @@
               :key="r"
               class="mrow"
               :style="{
-                transform: `translateX(${row.e * 12}cqw)`,
-                opacity: 1 - row.e,
-                backgroundColor: `rgba(34, 211, 238, ${row.glow * 0.55})`
+                transform: `translateX(${row.e * 110}px)`,
+                opacity: 1 - row.e
               }"
             >
-              <div v-for="col in 28" :key="col" class="cell">
-                <span :class="{ zero: cellText[r * 28 + col - 1] === '0.0' }">
+              <div
+                v-for="col in 28"
+                :key="col"
+                class="cell"
+                :style="{ backgroundColor: cellBg[r * 28 + col - 1] }"
+              >
+                <span :class="{ zero: cellText[r * 28 + col - 1] === '0' }">
                   {{ cellText[r * 28 + col - 1] }}
                 </span>
               </div>
+
+              <!-- Halo cyan qui accompagne la ligne pendant son départ -->
+              <div
+                class="row-glow"
+                :style="{ opacity: row.glow * 0.6 }"
+              />
             </div>
           </div>
         </div>
@@ -75,7 +85,11 @@
               </template>
               <template v-else>
                 <span class="vector-index">x<sub>{{ item.index + 1 }}</sub></span>
-                <span class="vector-value" :class="{ zero: item.text === '0.0' }">
+                <span
+                  class="vector-value"
+                  :class="{ zero: item.text === '0' }"
+                  :style="{ backgroundColor: item.bg }"
+                >
                   {{ item.text }}
                 </span>
               </template>
@@ -118,39 +132,44 @@ const pixels = Array.from({ length: 784 }, (_, index) => {
   return Math.max(0, Math.min(255, Math.round((8.5 - distance) * 85)))
 })
 
-// Valeurs normalisées (étape précédente), affichées avec 1 décimale
-const cellText = pixels.map(v => (v / 255).toFixed(1))
+/* ---------- Valeurs affichées ---------- */
+// Format court : 0, 1, ou une décimale (0.5) → les cases restent lisibles
+function fmt(v) {
+  const x = v / 255
+  if (x === 0) return '0'
+  if (x >= 0.95) return '1'
+  return x.toFixed(1)
+}
+
+// Teinte de fond selon la valeur : le 7 apparaît comme une carte de chaleur
+const tint = v => (v === 0 ? '#ffffff' : `rgba(14, 165, 233, ${0.12 + (v / 255) * 0.5})`)
+
+const cellText = pixels.map(fmt)
+const cellBg = pixels.map(tint)
 
 /* ---------- Chronologie (t : 0 → 1) ---------- */
-const DURATION = 4500        // durée totale (ms)
-const ROW_START = 0.02       // début de la 1re ligne
-const ROW_SPAN = 0.66        // étalement des départs de lignes
-const ROW_LEN = 0.2          // durée d'une ligne
-// → la dernière ligne finit à ≈ 0.86, puis la matrice se replie
+const DURATION = 4500
+const ROW_START = 0.02
+const ROW_SPAN = 0.66
+const ROW_LEN = 0.2
 
 const clamp01 = x => Math.max(0, Math.min(1, x))
 const smooth = x => x * x * (3 - 2 * x)
 
 const t = ref(0)
 
-// Apparition du panneau vecteur et repli de la matrice
 const p = computed(() => smooth(clamp01(t.value / 0.04)))
 const c = computed(() => smooth(clamp01((t.value - 0.86) / 0.14)))
 
-// Une entrée par ligne de la matrice
 const rows = computed(() =>
   Array.from({ length: 28 }, (_, r) => {
     const local = clamp01((t.value - ROW_START - (r / 28) * ROW_SPAN) / ROW_LEN)
-    return {
-      e: smooth(local),
-      glow: Math.sin(Math.PI * local)
-    }
+    return { e: smooth(local), glow: Math.sin(Math.PI * local) }
   })
 )
 
 /* ---------- Vecteur : entrées affichées ---------- */
-// Première valeur non nulle : on montre quelques valeurs autour pour que le vecteur soit parlant
-const firstNZ = Math.max(3, cellText.findIndex(s => s !== '0.0'))
+const firstNZ = Math.max(3, cellText.findIndex(s => s !== '0'))
 
 const shownIndices = [
   0, 1, 2,
@@ -160,13 +179,13 @@ const shownIndices = [
   781, 782, 783
 ]
 
-// Instant où le pixel est « aspiré » (ligne + position dans la ligne)
 const startOf = idx =>
   ROW_START + (Math.floor(idx / 28) / 28) * ROW_SPAN + ((idx % 28) / 28) * ROW_LEN
 
 const baseItems = shownIndices.map((idx, i) => {
-  if (idx !== null) return { index: idx, text: cellText[idx], start: startOf(idx) }
-  // Points de suspension : entre l'entrée précédente et la suivante
+  if (idx !== null) {
+    return { index: idx, text: cellText[idx], bg: cellBg[idx], start: startOf(idx) }
+  }
   const prev = startOf(shownIndices[i - 1])
   const next = startOf(shownIndices[i + 1])
   return { ellipsis: true, start: (prev + next) / 2 }
@@ -205,12 +224,13 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
 
 <style scoped>
 .mnist-vectorization {
-  --W: min(55vw, 55vh);   /* taille de la matrice */
-  --V: calc(var(--W) * 0.46);   /* largeur du vecteur */
+  /* Tailles en px : le canvas Slidev (980×552) est mis à l'échelle automatiquement */
+  --W: 640px;   /* largeur de la matrice */
+  --H: 470px;   /* hauteur de la matrice (et du vecteur) */
+  --V: 210px;   /* largeur du vecteur */
 
   width: 100%;
   height: 100%;
-  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,22 +241,17 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
 /* ---------- Panneaux ---------- */
 .panel {
   flex: none;
-  overflow: hidden;   /* permet le repli / l'apparition progressive */
+  overflow: hidden;
 }
 
 .panel-inner {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.matrix-inner {
-  width: var(--W);
-}
-
-.vector-inner {
-  width: var(--V);
-}
+.matrix-inner { width: var(--W); }
+.vector-inner { width: var(--V); }
 
 .representation-label {
   display: flex;
@@ -257,11 +272,10 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
 /* ---------- Matrice : fond blanc, texte noir ---------- */
 .matrix-frame {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1;
+  width: var(--W);
+  height: var(--H);
   background: #ffffff;
-  border: 1px solid #ffffff;
-  border-radius: 5px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -270,11 +284,12 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 5cqw;     /* place pour les crochets */
+  padding: 10px 36px;    /* place pour les crochets */
   box-sizing: border-box;
 }
 
 .mrow {
+  position: relative;
   flex: 1 1 0;
   min-height: 0;
   display: grid;
@@ -288,52 +303,61 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
   justify-content: center;
   min-width: 0;
   min-height: 0;
-  border: 1px solid #00000010;
+  border: 1px solid #0000000d;
 }
 
 .cell span {
   color: #111;
   font-weight: 700;
-  font-size: calc(90cqw / 28 / 3.3);
+  font-size: 10.5px;
   line-height: 1;
 }
 
 .cell span.zero {
-  color: #bdbdbd;
+  color: #c8c8c8;
   font-weight: 400;
+}
+
+.row-glow {
+  position: absolute;
+  inset: 0;
+  background: rgba(34, 211, 238, 0.7);
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
 
 /* Crochets de la matrice */
 .bracket {
   position: absolute;
-  top: 1.5cqw;
-  bottom: 1.5cqw;
-  width: 3cqw;
-  border: 0.7cqw solid #111;
+  top: 6px;
+  bottom: 6px;
+  width: 16px;
+  border: 4px solid #111;
   z-index: 2;
 }
 
 .bracket.left {
-  left: 1cqw;
+  left: 8px;
   border-right: none;
 }
 
 .bracket.right {
-  right: 1cqw;
+  right: 8px;
   border-left: none;
 }
 
-/* ---------- Vecteur colonne : même style (blanc / noir) ---------- */
+/* ---------- Vecteur colonne ---------- */
 .vector-frame {
-  height: var(--W);
+  width: var(--V);
+  height: var(--H);
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 14px;
-  padding: 3% 8%;
+  gap: 10px;
+  padding: 10px 14px;
   box-sizing: border-box;
   background: #ffffff;
-  border-radius: 5px;
+  border-radius: 6px;
 }
 
 .vector-content {
@@ -341,16 +365,16 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2% 0;
+  padding: 6px 0;
 }
 
 .vector-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-align: center;
-  font-size: clamp(11px, 2.2vh, 20px);
+  font-size: 16px;
   will-change: transform, opacity;
 }
 
@@ -361,34 +385,25 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
 .vector-value {
   color: #111;
   font-weight: 700;
+  border-radius: 4px;
+  padding: 3px 0;
 }
 
 .vector-value.zero {
-  color: #bdbdbd;
+  color: #c8c8c8;
   font-weight: 400;
 }
 
 .vector-row.ellipsis {
-  font-size: clamp(16px, 3vh, 28px);
+  font-size: 24px;
 }
 
 .vector-bracket {
-  width: 12px;
+  width: 14px;
   border-color: #111;
   border-style: solid;
 }
 
-.left-bracket {
-  border-width: 3px 0 3px 3px;
-}
-
-.right-bracket {
-  border-width: 3px 3px 3px 0;
-}
-
-@media (max-width: 500px) {
-  .mnist-vectorization {
-    --W: 60vw;
-  }
-}
+.left-bracket  { border-width: 4px 0 4px 4px; }
+.right-bracket { border-width: 4px 4px 4px 0; }
 </style>
