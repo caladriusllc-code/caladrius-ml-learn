@@ -290,6 +290,20 @@ import neuralNetworkMnist from './components/slides/secondPart/neuralNetworkMnis
 
 <neuralNetworkMnist />
 
+
+---
+layout: none
+class: p-0
+---
+<script setup>
+import secondPartIndex from './components/slides/secondPart/secondPartIndex.vue'
+</script>
+
+<secondPartIndex 
+title="Comment entraine t-on un tel réseau de neurone artificiel?"
+body="On passe par ce qu'on appelle, l'algorithme de retropropagation. L'un des algorithme à la base de tout ce qui est IA aujourd'hui"
+/>
+
 ---
 class: p-4
 ---

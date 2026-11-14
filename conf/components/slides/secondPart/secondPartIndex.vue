@@ -15,8 +15,8 @@
 <script>
 import { useIsSlideActive } from '@slidev/client'
 
-const TITLE = "Deuxième partie : Comment fonctionne la reconnaissance d'image?"
-const BODY =
+const DEFAULT_TITLE = "Deuxième partie : Comment fonctionne la reconnaissance d'image?"
+const DEFAULT_BODY =
   "Voyons ensemble comment est-ce que les ordinateurs analysent " +
   "et reconnaissent-ils les images manuscrites " +
   "Et souvent les visages des individus"
@@ -40,6 +40,16 @@ function tokenize(text) {
 }
 
 export default {
+  props: {
+    title: {
+      type: String,
+      default: DEFAULT_TITLE,
+    },
+    body: {
+      type: String,
+      default: DEFAULT_BODY,
+    },
+  },
   setup() {
     // true uniquement quand cette slide est affichée
     return { isActive: useIsSlideActive() }
@@ -73,8 +83,8 @@ export default {
       this.cursorOn = "title"
 
       const queue = [
-        ...tokenize(TITLE).map((t) => ({ part: "title", t })),
-        ...tokenize(BODY).map((t) => ({ part: "body", t })),
+        ...tokenize(this.title).map((t) => ({ part: "title", t })),
+        ...tokenize(this.body).map((t) => ({ part: "body", t })),
       ]
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
