@@ -35,14 +35,10 @@
         />
 
         <!-- Image courante : sort de la galerie, puis est balayée ligne par ligne -->
-        <g :opacity="endFade">
+        <g>
           <image
             class="px" :href="imgs[stepIdx]"
             :x="bigPos.x" :y="bigPos.y" :width="bigPos.s" :height="bigPos.s"
-          />
-          <rect
-            class="dim"
-            :x="BIG.x" :y="BIG.y" :width="BIG.s" :height="BIG.s * scan"
           />
           <rect class="frame big" :x="bigPos.x" :y="bigPos.y" :width="bigPos.s" :height="bigPos.s" />
           <line
@@ -54,10 +50,10 @@
         </g>
 
         <!-- Flèche image → vecteur -->
-        <path class="arrow" :opacity="clamp((t - 400) / 300) * endFade" d="M 224 300 L 238 300 M 233 295 L 238 300 L 233 305" />
+        <path class="arrow" :opacity="clamp((t - 400) / 300)" d="M 224 300 L 238 300 M 233 295 L 238 300 L 233 305" />
 
         <!-- Vecteur x : les 784 valeurs, lues ligne par ligne -->
-        <g :opacity="endFade">
+        <g>
           <rect class="strip-bg" :x="STRIP.x" :y="STRIP.y" :width="STRIP.w" :height="STRIP.h" />
           <image
             class="px" :href="strips[stepIdx]"
@@ -541,7 +537,6 @@ const caption = computed(() => {
 /* En-têtes */
 .hd {
   fill: #fff;
-  font: italic 16px Georgia, 'Times New Roman', serif;
 }
 .hd-sub {
   fill: rgba(255, 255, 255, 0.58);
@@ -555,6 +550,7 @@ const caption = computed(() => {
 /* Images */
 .px {
   image-rendering: pixelated;
+  color: #fff;
 }
 .frame {
   fill: none;
@@ -569,9 +565,6 @@ const caption = computed(() => {
   fill: none;
   stroke: #fff;
   stroke-width: 1.6;
-}
-.dim {
-  fill: rgba(5, 5, 5, 0.62);
 }
 .scan {
   stroke: #67e8f9;
@@ -649,7 +642,7 @@ const caption = computed(() => {
   fill: none;
   stroke: rgba(255, 255, 255, 0.3);
   stroke-width: 1;
-  animation: halo 2.8s ease-in-out infinite;
+  animation: halo 5.0s ease-in-out infinite;
   transform-box: fill-box;
   transform-origin: center;
 }
