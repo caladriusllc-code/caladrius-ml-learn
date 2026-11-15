@@ -88,9 +88,21 @@
         />
       </g>
 
-      <!-- Impulsions -->
+      <!-- Rétropropagation : connexions parcourues en sens inverse -->
+      <g class="back-overlays">
+        <path
+          v-for="(o, k) in active.bov" :key="'bov' + k"
+          :d="o.d" pathLength="1" stroke-dasharray="1 1"
+          :stroke-dashoffset="1 - o.prog"
+          :stroke="o.c" :stroke-width="o.w"
+          :opacity="o.prog < 0.005 ? 0 : o.op"
+        />
+      </g>
+
+      <!-- Impulsions avant et arrière -->
       <g class="particles">
         <circle v-for="(p, i) in active.pu" :key="'pu' + i" :cx="p.x" :cy="p.y" :r="p.r" :fill="p.c" />
+        <circle v-for="(p, i) in active.bpu" :key="'bpu' + i" :cx="p.x" :cy="p.y" :r="p.r" :fill="p.c" />
       </g>
 
       <!-- ============ Neurones des couches 1 à 3 ============ -->
@@ -309,6 +321,8 @@ const EDGES = [0, 1, 2].map((l) => {
         l, s, j,
         pts: [[x1, y1], [xm, y1], [xm, y2], [x2, y2]],
         d: `M ${x1} ${y1} C ${xm} ${y1}, ${xm} ${y2}, ${x2} ${y2}`,
+        dr: `M ${x2} ${y2} C ${xm} ${y2}, ${xm} ${y1}, ${x1} ${y1}`,
+        rpts: [[x2, y2], [xm, y2], [xm, y1], [x1, y1]],
       })
     }
   }
@@ -346,11 +360,41 @@ const CONTR = NET.map(({ px, h1, h2 }) => {
   })
 })
 
+// Gradients de rétropropagation : softmax + entropie croisée, puis dérivée de tanh.
+function backprop(px, h1, h2, y, target) {
+  const deltaOut = y.map((v, k) => v - (k === target ? 1 : 0))
+  const delta2 = h2.map((v, i) =>
+    W3[i].reduce((sum, w, j) => sum + w * deltaOut[j], 0) * (1 - v * v)
+  )
+  const delta1 = h1.map((v, i) =>
+    W2.reduce((sum, row, j) => sum + row[i] * delta2[j], 0) * (1 - v * v)
+  )
+  const raw = [new Array(28 * 16), new Array(16 * 16), new Array(16 * 10)]
+  for (let j = 0; j < 16; j++) {
+    for (let r = 0; r < 28; r++) {
+      let contribution = 0
+      for (let c = 0; c < 28; c++) contribution += px[r * 28 + c] * W1[j][r * 28 + c]
+      raw[0][j * 28 + r] = delta1[j] * contribution
+    }
+    for (let i = 0; i < 16; i++) raw[1][j * 16 + i] = delta2[j] * h1[i]
+  }
+  for (let j = 0; j < 10; j++) {
+    for (let i = 0; i < 16; i++) raw[2][j * 16 + i] = deltaOut[j] * h2[i]
+  }
+  return raw.map((a) => {
+    const m = Math.max(...a.map(Math.abs)) || 1
+    return a.map((v) => v / m)
+  })
+}
+const BACK_CONTR = NET.map(({ px, h1, h2, y }, k) => backprop(px, h1, h2, y, k))
+
 /* =====================================================================
    4. Outils
    ===================================================================== */
 const POS = '#67e8f9'
 const NEG = '#fb923c'
+const BP_POS = '#f472b6'
+const BP_NEG = '#c084fc'
 const clamp = (v) => Math.min(1, Math.max(0, v))
 const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
 const lerp = (a, b, k) => a + (b - a) * k
@@ -397,7 +441,7 @@ function toURL(w, h, get) {
 /* =====================================================================
    6. Horloge : un chiffre toutes les DUR ms, en boucle
    ===================================================================== */
-const DUR = 6200
+const DUR = 9600
 const TOTAL = DUR * 10
 const stepIdx = ref(0)
 const t = ref(0)
@@ -426,7 +470,7 @@ onMounted(() => {
 
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   if (reduce) {
-    t.value = 5800 // image fixe : propagation terminée, classe prédite visible
+    t.value = 9000 // propagation avant et rétropropagation terminées
   } else {
     raf = requestAnimationFrame(frame)
   }
@@ -439,6 +483,9 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
 const S = [1800, 3250, 4450]        // départ des impulsions couche l → l+1
 const STAG = [22, 26, 26]           // décalage entre sources
 const DRAW = 650                    // durée d'une impulsion
+const BACK_START = [6350, 7050, 7750] // sortie → cachée 2 → cachée 1 → entrée
+const BACK_STAG = [22, 26, 26]
+const BACK_DRAW = 650
 const REV = [3080, 4320, 5520]      // instant où h¹, h², ŷ prennent leur valeur
 const WIN = [[0, 1e9], [0, 1900], [500, 2000], [1800, 3400], [3250, 4500], [4450, 6000], [4450, 6000]]
 const ACT_WIN = [0, 1, 2].map((l) => [S[l], REV[l] + 750])
@@ -469,11 +516,13 @@ const flash = computed(() =>
   REV.map((r) => clamp((t.value - r) / 200) * (1 - clamp((t.value - r - 200) / 500)))
 )
 
-/* Connexions illuminées et impulsions de la couche en cours */
+/* Connexions illuminées : propagation avant puis rétropropagation */
 const active = computed(() => {
   const T = t.value
   const d = stepIdx.value
-  const res = { ov: [], pu: [] }
+  const res = { ov: [], pu: [], bov: [], bpu: [] }
+
+  // Propagation avant : entrée → sortie.
   for (let l = 0; l < 3; l++) {
     if (T < ACT_WIN[l][0] || T > ACT_WIN[l][1]) continue
     const fade = 1 - clamp((T - REV[l] - 200) / 500)
@@ -494,6 +543,31 @@ const active = computed(() => {
       }
     }
   }
+
+  // Rétropropagation : sortie → cachée 2 → cachée 1 → entrée.
+  for (let stage = 0; stage < 3; stage++) {
+    const l = 2 - stage
+    const start = BACK_START[stage]
+    const stop = start + BACK_DRAW + (l === 0 ? 15 : 16) * BACK_STAG[stage]
+    if (T < start || T > stop + 180) continue
+    const fade = 1 - clamp((T - stop) / 180)
+    const E = EDGES[l]
+    const C = BACK_CONTR[d][l]
+    for (let n = 0; n < E.length; n++) {
+      const e = E[n]
+      const rel = C[n]
+      const a = Math.abs(rel)
+      if (a < 0.045) continue
+      const u = (T - start - e.j * BACK_STAG[stage]) / BACK_DRAW
+      const prog = ease(clamp(u))
+      const c = rel >= 0 ? BP_POS : BP_NEG
+      res.bov.push({ d: e.dr, prog, w: 1.1 + 2.8 * a, op: fade * (0.35 + 0.65 * a), c })
+      if (u > 0 && u < 1) {
+        const [x, y] = bez(e.rpts, prog)
+        res.bpu.push({ x, y, r: 1.8 + 2.5 * a, c })
+      }
+    }
+  }
   return res
 })
 
@@ -511,8 +585,14 @@ const caption = computed(() => {
   if (T < 3250) return 'Couche cachée 1 :  h¹ = tanh(W¹ x)'
   if (T < 4450) return 'Couche cachée 2 :  h² = tanh(W² h¹)'
   if (T < 5600) return 'Sortie :  ŷ = softmax(W³ h²)'
-  const p = step.value.y[win.value]
-  return `Prédiction : ${win.value}   ·   probabilité ${fr(p * 100, 0)} %`
+  if (T < 6350) {
+    const p = step.value.y[win.value]
+    return `Prédiction : ${win.value}   ·   probabilité ${fr(p * 100, 0)} %`
+  }
+  if (T < 7050) return 'Erreur de sortie : δ³ = ŷ − y  ·  calcul du gradient'
+  if (T < 7750) return 'Rétropropagation : sortie → couche cachée 2'
+  if (T < 8550) return 'Rétropropagation : couche cachée 2 → couche cachée 1 → entrée'
+  return 'Gradient propagé : prêt pour la mise à jour des poids' 
 })
 </script>
 
@@ -590,9 +670,13 @@ const caption = computed(() => {
   stroke: #fff;
   stroke-width: 0.6;
 }
-.overlays path {
+.overlays path,
+.back-overlays path {
   fill: none;
   stroke-linecap: round;
+}
+.back-overlays path {
+  filter: drop-shadow(0 0 3px rgba(244, 114, 182, 0.65));
 }
 
 /* Neurones */
