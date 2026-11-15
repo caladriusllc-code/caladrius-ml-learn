@@ -315,6 +315,26 @@ import costFunction from './components/slides/secondPart/costFunction.vue'
 
 ---
 class: p-4
+clicks: 4
+---
+<script setup>
+import NumberSkills from './components/slides/secondPart/NumberSkills.vue'
+</script>
+
+<NumberSkills />
+
+---
+class: p-4
+clicks: 4
+---
+<script setup>
+import NumberSkills from './components/slides/secondPart/retropropagation/index.vue'
+</script>
+
+<NumberSkills />
+
+---
+class: p-4
 ---
 <script setup>
 import forwardPropagation from './components/slides/secondPart/forwardPropagation.vue'
