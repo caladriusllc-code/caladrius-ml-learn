@@ -308,6 +308,15 @@ body="On passe par ce qu'on appelle, l'algorithme de retropropagation. L'un des 
 class: p-4
 ---
 <script setup>
+import costFunction from './components/slides/secondPart/costFunction.vue'
+</script>
+
+<costFunction />
+
+---
+class: p-4
+---
+<script setup>
 import forwardPropagation from './components/slides/secondPart/forwardPropagation.vue'
 </script>
 
