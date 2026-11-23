@@ -306,6 +306,7 @@ body="On passe par ce qu'on appelle, l'algorithme de retropropagation. L'un des 
 
 ---
 class: p-4
+layout: center
 ---
 <script setup>
 import costFunction from './components/slides/secondPart/costFunction.vue'
@@ -316,6 +317,7 @@ import costFunction from './components/slides/secondPart/costFunction.vue'
 ---
 class: p-4
 clicks: 4
+layout: center
 ---
 <script setup>
 import NumberSkills from './components/slides/secondPart/NumberSkills.vue'
@@ -341,3 +343,12 @@ import forwardPropagation from './components/slides/secondPart/forwardPropagatio
 </script>
 
 <forwardPropagation />
+
+---
+class: p-4
+---
+<script setup>
+import optimalParams from './components/slides/secondPart/optimalParams.vue'
+</script>
+
+<optimalParams />
