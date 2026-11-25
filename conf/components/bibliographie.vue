@@ -96,6 +96,28 @@ const defaultEntries = [
     url: '',
     note: 'Compréhension des concepts relatifs aux LLM',
   },
+  {
+    id: 'geron-2025',
+    authors: 'Deisenroth, M.A et Al',
+    year: 2020,
+    title: 'Mathematics for machine learning',
+    subtitle: 'language understanding and generation',
+    edition: '1ᵉ éd.',
+    publisher: 'Cambridge University Press',
+    cover: '/images.jpeg', // Placer images.jfif dans public/ (ou importer l'asset)
+    url: '',
+    note: 'Compréhension des concepts relatifs aux LLM',
+  },
+  {
+    id: 'geron-2026',
+    authors: 'Sanderson, D',
+    year: 2017,
+    title: 'But what is a neural network? | Deep learning chapter',
+    subtitle: 'https://www.youtube.com/watch?v=aircAruvnKk',
+    cover: '/threeblue.jpeg', // Placer images.jfif dans public/ (ou importer l'asset)
+    url: '',
+    note: 'Vidéo de three blue one brown',
+  },
   // Exemple prêt à décommenter pour ajouter un second ouvrage :
   // {
   //   id: 'goodfellow-2016',
@@ -148,10 +170,12 @@ const sortedEntries = computed(() => {
 .apa-biblio {
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
   padding: 1.5rem 2rem;
   color: #f8fafc;
   background: #050505;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  overflow-y: auto;
 }
 
 .biblio-header {
