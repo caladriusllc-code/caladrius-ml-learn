@@ -29,6 +29,18 @@ layout: none
 class: px-12 py-8
 ---
 
+<script setup>
+import bibliographie from './components/bibliographie.vue'
+</script>
+
+
+<bibliographie />
+
+---
+layout: none
+class: px-12 py-8
+---
+
 <Vintageslides> 
   <p class="q"> « Rien dans la vie n’est à 
     <span :class="$clicks >= 1 ? 'dim' : ''">craindre</span>, 
@@ -192,7 +204,6 @@ import perceptronLearning from './components/slides/deeplearning/perceptronLearn
 <perceptronLearning />
 
 ---
-layout: center
 class: px-12 py-8
 ---
 <script setup>
@@ -306,16 +317,6 @@ body="On passe par ce qu'on appelle, l'algorithme de retropropagation. L'un des 
 
 ---
 class: p-4
-layout: center
----
-<script setup>
-import costFunction from './components/slides/secondPart/costFunction.vue'
-</script>
-
-<costFunction />
-
----
-class: p-4
 clicks: 4
 layout: center
 ---
@@ -348,7 +349,7 @@ import forwardPropagation from './components/slides/secondPart/forwardPropagatio
 class: p-4
 ---
 <script setup>
-import optimalParams from './components/slides/secondPart/optimalParams.vue'
+import forwardpropagationtwo from './components/slides/secondPart/forwardpropagationtwo.vue'
 </script>
 
-<optimalParams />
+<forwardpropagationtwo />

@@ -505,6 +505,7 @@ const gradLabel = computed(() => {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
+  min-height: 0;
   padding: clamp(16px, 3vw, 30px);
   overflow: hidden;
   color: #fff;
@@ -519,7 +520,7 @@ const gradLabel = computed(() => {
 .diagram {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%; 
   overflow: visible;
 }
 

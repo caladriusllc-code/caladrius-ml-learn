@@ -7,8 +7,8 @@
       aria-label="Dix images de chiffres, de 0 à 9, sont envoyées une à une dans un réseau de neurones 784, 16, 16, 10. Le signal se propage couche après couche et la sortie la plus forte désigne le chiffre prédit."
     >
       <defs>
-        <filter id="fw-glow" x="-200%" y="-200%" width="500%" height="500%">
-          <feGaussianBlur stdDeviation="4" result="b" />
+        <filter id="fw-glow" x="-120%" y="-120%" width="340%" height="340%">
+          <feGaussianBlur stdDeviation="3.5" result="b" />
           <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
         <clipPath id="fw-strip-clip">
@@ -70,7 +70,7 @@
       </g>
 
       <!-- ============ Connexions au repos ============ -->
-      <g class="wires">
+      <g class="wires" shape-rendering="optimizeSpeed">
         <path
           v-for="(e, k) in WIRES" :key="'w' + k"
           :d="e.d" :stroke-opacity="e.o"
@@ -81,10 +81,11 @@
       <g class="overlays">
         <path
           v-for="(o, k) in active.ov" :key="'ov' + k"
-          :d="o.d" pathLength="1" stroke-dasharray="1 1"
-          :stroke-dashoffset="1 - o.prog"
+          :d="o.d"
+          :stroke-dasharray="`${o.len} ${o.len + 10}`"
+          :stroke-dashoffset="o.len * (1 - o.prog)"
           :stroke="o.c" :stroke-width="o.w"
-          :opacity="o.prog < 0.005 ? 0 : o.op"
+          :opacity="o.op"
         />
       </g>
 
@@ -92,10 +93,11 @@
       <g class="back-overlays">
         <path
           v-for="(o, k) in active.bov" :key="'bov' + k"
-          :d="o.d" pathLength="1" stroke-dasharray="1 1"
-          :stroke-dashoffset="1 - o.prog"
+          :d="o.d"
+          :stroke-dasharray="`${o.len} ${o.len + 10}`"
+          :stroke-dashoffset="o.len * (1 - o.prog)"
           :stroke="o.c" :stroke-width="o.w"
-          :opacity="o.prog < 0.005 ? 0 : o.op"
+          :opacity="o.op"
         />
       </g>
 
@@ -110,7 +112,12 @@
         <circle
           v-if="flash[n.l - 1] > 0.02"
           class="flash" :cx="n.x" :cy="n.y" :r="n.r + 2 + flash[n.l - 1] * 9"
-          :opacity="flash[n.l - 1] * 0.9" filter="url(#fw-glow)"
+          :opacity="flash[n.l - 1] * 0.85"
+        />
+        <circle
+          v-if="backFlash[n.l - 1] > 0.02"
+          class="back-flash" :cx="n.x" :cy="n.y" :r="n.r + 2 + backFlash[n.l - 1] * 10"
+          :opacity="backFlash[n.l - 1] * 0.85"
         />
         <circle
           class="ring" :cx="n.x" :cy="n.y" :r="n.r + 2.5"
@@ -173,7 +180,6 @@ const arc = (cx, cy, rx, ry, a0, a1, n = 32) =>
     return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]
   })
 
-// Tracés des chiffres, en coordonnées de la grille 28 × 28
 const STROKES = [
   [arc(14, 14, 6.5, 10, 0, 2 * PI, 40)],
   [[[11, 8], [15, 4], [15, 24]]],
@@ -211,10 +217,7 @@ const IDX = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 const DIGITS = STROKES.map(renderDigit)
 
 /* =====================================================================
-   2. Le réseau 784 → 16 → 16 → 10 : calcul réel de la propagation avant
-      h¹ = tanh(W¹x)   h² = tanh(W²h¹)   ŷ = softmax(W³h² + b)
-   Poids W¹ et W² aléatoires (graine fixe). W³ est calculée en forme close
-   sur ces dix images pour que la démo aboutisse à la bonne classe.
+   2. Le réseau 784 → 16 → 16 → 10
    ===================================================================== */
 function rng(seed) {
   return () => {
@@ -256,7 +259,6 @@ function solve(A, B) {
   return M.map((r) => r.slice(n))
 }
 
-// Ajustement de la dernière couche (régression ridge) : logit visé = 5 pour la bonne classe
 const HM = DIGITS.map((px) => [...hidden(px).h2, 1])
 const K = HM.map((a, i) => HM.map((b, j) => dot(a, b) + (i === j ? 1e-3 : 0)))
 const TARGET = IDX.map((i) => IDX.map((j) => (i === j ? 5 : 0)))
@@ -276,7 +278,44 @@ function forward(px) {
 const NET = DIGITS.map(forward)
 
 /* =====================================================================
-   3. Géométrie
+   3. Outils géométriques et mathématiques
+   ===================================================================== */
+const POS = '#67e8f9'
+const NEG = '#fb923c'
+const BP_POS = '#f472b6'
+const BP_NEG = '#c084fc'
+const clamp = (v) => Math.min(1, Math.max(0, v))
+const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
+const lerp = (a, b, k) => a + (b - a) * k
+
+function bez(pts, u) {
+  const m = 1 - u
+  const [p0, p1, p2, p3] = pts
+  return [
+    m * m * m * p0[0] + 3 * m * m * u * p1[0] + 3 * m * u * u * p2[0] + u * u * u * p3[0],
+    m * m * m * p0[1] + 3 * m * m * u * p1[1] + 3 * m * u * u * p2[1] + u * u * u * p3[1],
+  ]
+}
+
+function bezLen(pts, steps = 16) {
+  let len = 0
+  let prev = pts[0]
+  for (let i = 1; i <= steps; i++) {
+    const cur = bez(pts, i / steps)
+    len += Math.hypot(cur[0] - prev[0], cur[1] - prev[1])
+    prev = cur
+  }
+  return Number(len.toFixed(1))
+}
+
+const fr = (n, d) => {
+  const v = Math.abs(n) < 0.5 * Math.pow(10, -d) ? 0 : n
+  const s = Math.abs(v).toFixed(d).replace('.', ',')
+  return v < 0 ? '\u2212' + s : s
+}
+
+/* =====================================================================
+   4. Géométrie du diagramme
    ===================================================================== */
 const GAL = { x: 22, s: 38 }
 const galY = (k) => 78 + k * 44
@@ -305,7 +344,6 @@ const HEADERS = [
   { x: OUT.barX + OUT.barW / 2, name: 'Probabilité', sub: 'softmax' },
 ]
 
-// Connexions : couche 0 = 28 « lignes » de l'image → h¹ ; puis h¹ → h² ; h² → sortie
 const SRC_N = [28, 16, 16]
 const DST_N = [16, 16, 10]
 const EDGES = [0, 1, 2].map((l) => {
@@ -317,9 +355,11 @@ const EDGES = [0, 1, 2].map((l) => {
       const x2 = (l === 2 ? OUT.x - 14 : XS[l + 1] - 12) - 2
       const y2 = l === 2 ? outY(j) : yHid(j)
       const xm = (x1 + x2) / 2
+      const pts = [[x1, y1], [xm, y1], [xm, y2], [x2, y2]]
       list.push({
         l, s, j,
-        pts: [[x1, y1], [xm, y1], [xm, y2], [x2, y2]],
+        pts,
+        len: bezLen(pts),
         d: `M ${x1} ${y1} C ${xm} ${y1}, ${xm} ${y2}, ${x2} ${y2}`,
         dr: `M ${x2} ${y2} C ${xm} ${y2}, ${xm} ${y1}, ${x1} ${y1}`,
         rpts: [[x2, y2], [xm, y2], [xm, y1], [x1, y1]],
@@ -329,7 +369,6 @@ const EDGES = [0, 1, 2].map((l) => {
   return list
 })
 
-// Opacité au repos : proportionnelle à la norme du poids
 const wNorm = [
   (j, s) => Math.hypot(...W1[j].slice(s * 28, s * 28 + 28)),
   (j, s) => Math.abs(W2[j][s]),
@@ -342,7 +381,6 @@ EDGES.forEach((E, l) => {
 })
 const WIRES = EDGES.flat()
 
-// Contribution de chaque connexion pour chaque image, normalisée par couche dans [−1, 1]
 const CONTR = NET.map(({ px, h1, h2 }) => {
   const raw = [new Array(28 * 16), new Array(16 * 16), new Array(16 * 10)]
   for (let j = 0; j < 16; j++) {
@@ -360,7 +398,6 @@ const CONTR = NET.map(({ px, h1, h2 }) => {
   })
 })
 
-// Gradients de rétropropagation : softmax + entropie croisée, puis dérivée de tanh.
 function backprop(px, h1, h2, y, target) {
   const deltaOut = y.map((v, k) => v - (k === target ? 1 : 0))
   const delta2 = h2.map((v, i) =>
@@ -389,33 +426,7 @@ function backprop(px, h1, h2, y, target) {
 const BACK_CONTR = NET.map(({ px, h1, h2, y }, k) => backprop(px, h1, h2, y, k))
 
 /* =====================================================================
-   4. Outils
-   ===================================================================== */
-const POS = '#67e8f9'
-const NEG = '#fb923c'
-const BP_POS = '#f472b6'
-const BP_NEG = '#c084fc'
-const clamp = (v) => Math.min(1, Math.max(0, v))
-const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
-const lerp = (a, b, k) => a + (b - a) * k
-
-function bez(pts, u) {
-  const m = 1 - u
-  const [p0, p1, p2, p3] = pts
-  return [
-    m * m * m * p0[0] + 3 * m * m * u * p1[0] + 3 * m * u * u * p2[0] + u * u * u * p3[0],
-    m * m * m * p0[1] + 3 * m * m * u * p1[1] + 3 * m * u * u * p2[1] + u * u * u * p3[1],
-  ]
-}
-
-const fr = (n, d) => {
-  const v = Math.abs(n) < 0.5 * Math.pow(10, -d) ? 0 : n
-  const s = Math.abs(v).toFixed(d).replace('.', ',')
-  return v < 0 ? '\u2212' + s : s
-}
-
-/* =====================================================================
-   5. Images sous forme de data-URL (canvas) : 10 vignettes + 10 « codes-barres » du vecteur
+   5. Images sous forme de data-URL (canvas)
    ===================================================================== */
 const ready = ref(false)
 const imgs = ref([])
@@ -470,7 +481,7 @@ onMounted(() => {
 
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   if (reduce) {
-    t.value = 9000 // propagation avant et rétropropagation terminées
+    t.value = 8250
   } else {
     raf = requestAnimationFrame(frame)
   }
@@ -478,20 +489,20 @@ onMounted(() => {
 onBeforeUnmount(() => cancelAnimationFrame(raf))
 
 /* =====================================================================
-   7. Chronologie d'un exemple (ms)
+   7. Chronologie fluide (ms)
    ===================================================================== */
-const S = [1800, 3250, 4450]        // départ des impulsions couche l → l+1
-const STAG = [22, 26, 26]           // décalage entre sources
-const DRAW = 650                    // durée d'une impulsion
-const BACK_START = [6350, 7050, 7750] // sortie → cachée 2 → cachée 1 → entrée
-const BACK_STAG = [22, 26, 26]
-const BACK_DRAW = 650
-const REV = [3080, 4320, 5520]      // instant où h¹, h², ŷ prennent leur valeur
+const S = [1800, 3250, 4450]
+const STAG = [22, 26, 26]
+const DRAW = 650
+const BACK_START = [6350, 7000, 7650] // sortie → cachée 2 → cachée 1 → entrée
+const BACK_STAG = [24, 22, 22]
+const BACK_DRAW = 620
+const BACK_PULSE = [7650, 7000, 6250] // flash sur [h¹, h², ŷ] au passage du gradient
+const REV = [3080, 4320, 5520]
 const WIN = [[0, 1e9], [0, 1900], [500, 2000], [1800, 3400], [3250, 4500], [4450, 6000], [4450, 6000]]
-const ACT_WIN = [0, 1, 2].map((l) => [S[l], REV[l] + 750])
 
 const step = computed(() => NET[stepIdx.value])
-const endFade = computed(() => 1 - clamp((t.value - (DUR - 300)) / 300))
+const endFade = computed(() => 1 - ease(clamp((t.value - (DUR - 550)) / 550)))
 const rev = computed(() => REV.map((r) => ease(clamp((t.value - r) / 300))))
 const scan = computed(() => clamp((t.value - 500) / 1200))
 
@@ -505,7 +516,6 @@ const hdrOp = computed(() =>
   WIN.map(([a, b]) => 0.45 + 0.55 * clamp((t.value - a) / 250) * (1 - clamp((t.value - b) / 300)))
 )
 
-// Valeurs affichées dans les neurones : h¹, h², ŷ
 const actsShown = computed(() =>
   [step.value.h1, step.value.h2, step.value.y].map((a, l) => a.map((v) => v * rev.value[l] * endFade.value))
 )
@@ -516,16 +526,21 @@ const flash = computed(() =>
   REV.map((r) => clamp((t.value - r) / 200) * (1 - clamp((t.value - r - 200) / 500)))
 )
 
-/* Connexions illuminées : propagation avant puis rétropropagation */
+const backFlash = computed(() =>
+  BACK_PULSE.map((r) => clamp((t.value - r) / 180) * (1 - ease(clamp((t.value - r - 180) / 520))))
+)
+
+/* Connexions illuminées : onde continue avec dissipation progressive par arête */
 const active = computed(() => {
   const T = t.value
   const d = stepIdx.value
   const res = { ov: [], pu: [], bov: [], bpu: [] }
 
-  // Propagation avant : entrée → sortie.
+  // Propagation avant : entrée → sortie
   for (let l = 0; l < 3; l++) {
-    if (T < ACT_WIN[l][0] || T > ACT_WIN[l][1]) continue
-    const fade = 1 - clamp((T - REV[l] - 200) / 500)
+    const start = S[l]
+    const maxEnd = start + (SRC_N[l] - 1) * STAG[l] + DRAW * 1.75
+    if (T < start || T > maxEnd) continue
     const E = EDGES[l]
     const C = CONTR[d][l]
     for (let n = 0; n < E.length; n++) {
@@ -533,38 +548,55 @@ const active = computed(() => {
       const a = Math.abs(rel)
       if (a < 0.12) continue
       const e = E[n]
-      const u = (T - S[l] - e.s * STAG[l]) / DRAW
+      const u = (T - start - e.s * STAG[l]) / DRAW
+      if (u <= 0 || u >= 1.75) continue
       const prog = ease(clamp(u))
+      const edgeFade = u <= 0.85 ? 1 : 1 - ease(clamp((u - 0.85) / 0.9))
       const c = rel > 0 ? POS : NEG
-      res.ov.push({ d: e.d, prog, w: 0.9 + 2.4 * a, op: fade * (0.3 + 0.7 * a), c })
-      if (u > 0 && u < 1) {
+      res.ov.push({
+        d: e.d,
+        len: e.len,
+        prog,
+        w: 0.9 + 2.4 * a,
+        op: edgeFade * (0.3 + 0.7 * a),
+        c,
+      })
+      if (u < 1) {
         const [x, y] = bez(e.pts, prog)
         res.pu.push({ x, y, r: 1.6 + 2.4 * a, c })
       }
     }
   }
 
-  // Rétropropagation : sortie → cachée 2 → cachée 1 → entrée.
+  // Rétropropagation : sortie → cachée 2 → cachée 1 → entrée
   for (let stage = 0; stage < 3; stage++) {
     const l = 2 - stage
     const start = BACK_START[stage]
-    const stop = start + BACK_DRAW + (l === 0 ? 15 : 16) * BACK_STAG[stage]
-    if (T < start || T > stop + 180) continue
-    const fade = 1 - clamp((T - stop) / 180)
+    const maxEnd = start + (DST_N[l] - 1) * BACK_STAG[stage] + BACK_DRAW * 1.75
+    if (T < start || T > maxEnd) continue
     const E = EDGES[l]
     const C = BACK_CONTR[d][l]
     for (let n = 0; n < E.length; n++) {
-      const e = E[n]
       const rel = C[n]
       const a = Math.abs(rel)
-      if (a < 0.045) continue
+      if (a < 0.11) continue
+      const e = E[n]
       const u = (T - start - e.j * BACK_STAG[stage]) / BACK_DRAW
+      if (u <= 0 || u >= 1.75) continue
       const prog = ease(clamp(u))
+      const edgeFade = u <= 0.85 ? 1 : 1 - ease(clamp((u - 0.85) / 0.9))
       const c = rel >= 0 ? BP_POS : BP_NEG
-      res.bov.push({ d: e.dr, prog, w: 1.1 + 2.8 * a, op: fade * (0.35 + 0.65 * a), c })
-      if (u > 0 && u < 1) {
+      res.bov.push({
+        d: e.dr,
+        len: e.len,
+        prog,
+        w: 1.1 + 2.5 * a,
+        op: edgeFade * (0.35 + 0.65 * a),
+        c,
+      })
+      if (u < 1) {
         const [x, y] = bez(e.rpts, prog)
-        res.bpu.push({ x, y, r: 1.8 + 2.5 * a, c })
+        res.bpu.push({ x, y, r: 1.9 + 2.4 * a, c })
       }
     }
   }
@@ -589,10 +621,10 @@ const caption = computed(() => {
     const p = step.value.y[win.value]
     return `Prédiction : ${win.value}   ·   probabilité ${fr(p * 100, 0)} %`
   }
-  if (T < 7050) return 'Erreur de sortie : δ³ = ŷ − y  ·  calcul du gradient'
-  if (T < 7750) return 'Rétropropagation : sortie → couche cachée 2'
+  if (T < 7000) return 'Erreur de sortie : δ³ = ŷ − y  ·  calcul du gradient'
+  if (T < 7650) return 'Rétropropagation : sortie → couche cachée 2'
   if (T < 8550) return 'Rétropropagation : couche cachée 2 → couche cachée 1 → entrée'
-  return 'Gradient propagé : prêt pour la mise à jour des poids' 
+  return 'Gradient propagé : prêt pour la mise à jour des poids'
 })
 </script>
 
@@ -675,9 +707,6 @@ const caption = computed(() => {
   fill: none;
   stroke-linecap: round;
 }
-.back-overlays path {
-  filter: drop-shadow(0 0 3px rgba(244, 114, 182, 0.65));
-}
 
 /* Neurones */
 .ring {
@@ -696,6 +725,11 @@ const caption = computed(() => {
   fill: none;
   stroke: #fff;
   stroke-width: 1.2;
+}
+.back-flash {
+  fill: none;
+  stroke: #f472b6;
+  stroke-width: 1.4;
 }
 
 /* Sortie */

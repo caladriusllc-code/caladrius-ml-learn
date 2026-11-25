@@ -309,6 +309,7 @@ const winOp = computed(() => clamp((t.value - 4800) / 300) * endFade.value)
   --muted: rgba(255, 255, 255, 0.58);
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
   padding: clamp(16px, 3vw, 30px);
   overflow: hidden;
   color: #fff;
@@ -321,7 +322,7 @@ const winOp = computed(() => clamp((t.value - 4800) / 300) * endFade.value)
 .diagram {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   overflow: visible;
 }
 .diagram text {

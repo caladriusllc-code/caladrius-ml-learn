@@ -466,6 +466,7 @@ const texLive2 = computed(() =>
   --cc: #fff; /* monochrome */
 
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -474,7 +475,7 @@ const texLive2 = computed(() =>
 
 svg {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   overflow: visible;
 }

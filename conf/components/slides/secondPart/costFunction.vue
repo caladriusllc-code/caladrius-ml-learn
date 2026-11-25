@@ -413,6 +413,7 @@ const gaugeH = computed(() => GAUGE.h * clamp(loss.value / LN10) * gaugeP.value)
 .mlp-loss {
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
   color: #fff;
   background: #050505;
   display: flex;
