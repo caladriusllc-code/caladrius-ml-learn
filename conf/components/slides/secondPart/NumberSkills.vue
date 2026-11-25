@@ -468,12 +468,11 @@ const DUR = REV[4] + HOLD
 const t = ref(0)
 let raf = 0
 let t0 = 0
-const FINAL_TIME = REV[4] + 800
 
+// Une boucle complète = DUR ms ; le temps repart à 0 après le fondu de fin
 function frame(ts) {
   if (!t0) t0 = ts
-  t.value = Math.min(ts - t0, FINAL_TIME)
-  if (t.value >= FINAL_TIME) return
+  t.value = (ts - t0) % DUR
   raf = requestAnimationFrame(frame)
 }
 

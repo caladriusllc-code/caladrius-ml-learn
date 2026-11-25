@@ -34,7 +34,7 @@ import bibliographie from './components/bibliographie.vue'
 </script>
 
 
-<bibliographie />
+<bibliographie compact :columns="4" />
 
 ---
 layout: none
@@ -349,7 +349,25 @@ import forwardPropagation from './components/slides/secondPart/forwardPropagatio
 class: p-4
 ---
 <script setup>
+import retropropagationLearning from './components/slides/secondPart/retropropagationLearning.vue'
+</script>
+
+<retropropagationLearning />
+
+---
+class: p-4
+---
+<script setup>
 import forwardpropagationtwo from './components/slides/secondPart/forwardpropagationtwo.vue'
 </script>
 
 <forwardpropagationtwo />
+
+---
+class: p-4
+---
+<script setup>
+import thankyou from './components/slides/secondPart/thankyou.vue'
+</script>
+
+<thankyou :speed="90" :hold="3500" :pause="800"/>

@@ -7,8 +7,9 @@
 
         <p>
             <strong>Le perceptron:</strong>
-            C'est une architecture un peu plus différente 
-            de la précédente où maintenant les entrées et 
+            C'est une architecture un peu plus différente
+            de la précédente mise en place en 1957 par 
+            <strong>Franck Rosenblatt</strong> où maintenant les entrées et 
             les sorties de sont désormais des nombres et 
             chaque connexion en entrée possède un poids. 
         </p>
